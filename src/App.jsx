@@ -1283,10 +1283,6 @@ export default function App() {
         }
     };
 
-// --- MAIN APP COMPONENT ---
-            default: return <HomePage posts={posts} onPost={handlePost} />;
-        }
-    };
 
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-purple-500/30">
