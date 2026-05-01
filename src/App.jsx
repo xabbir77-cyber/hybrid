@@ -575,24 +575,6 @@ export default function App() {
 
             <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        body {
-          font-family: 'Inter', sans-serif;
-          background-color: #050505;
-          margin: 0;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}} />
         </div>
     );
 }
