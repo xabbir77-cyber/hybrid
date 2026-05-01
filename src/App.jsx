@@ -718,39 +718,123 @@ const WatchHubPage = () => {
     );
 };
 
-// Advanced Direct Message Page
+// --- ADVANCED DIRECT MESSAGE COMPONENTS ---
+
+const WatchTogetherPiP = ({ url, onClose }) => (
+    <motion.div
+        drag
+        dragConstraints={{ left: -500, right: 500, top: -500, bottom: 500 }}
+        initial={{ scale: 0, opacity: 0, y: 100 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0, opacity: 0 }}
+        className="fixed bottom-24 right-4 w-72 aspect-video bg-black rounded-2xl border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.4)] z-[150] overflow-hidden group"
+    >
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={onClose} className="p-1 bg-black/60 rounded-full text-white"><Plus className="rotate-45" size={16} /></button>
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Play size={32} fill="white" className="animate-pulse" />
+            </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+            <motion.div animate={{ width: "60%" }} className="h-full bg-purple-500" />
+        </div>
+    </motion.div>
+);
+
+const ChatBubble = ({ message, isMe }) => (
+    <motion.div
+        initial={{ opacity: 0, x: isMe ? 20 : -20, scale: 0.8 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-4 group relative`}
+    >
+        {!isMe && (
+            <img src={message.avatar} className="w-8 h-8 rounded-full mr-2 mt-auto" />
+        )}
+        <div className="max-w-[75%] relative">
+            <div className={`p-4 rounded-3xl text-sm leading-relaxed ${
+                isMe 
+                ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-tr-sm shadow-[0_10px_20px_rgba(147,51,234,0.2)] border border-white/10' 
+                : 'bg-white/5 backdrop-blur-xl border border-white/10 text-gray-200 rounded-tl-sm'
+            }`}>
+                {message.text}
+                {message.translated && (
+                    <div className="mt-2 pt-2 border-t border-white/10 text-[10px] italic text-purple-300">
+                        Translated: {message.translated}
+                    </div>
+                )}
+            </div>
+            <div className={`text-[9px] mt-1 text-gray-500 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                {message.time} {isMe && <span className="text-purple-400">●●</span>}
+                <button className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 hover:text-purple-400 flex items-center gap-1">
+                    <Globe size={10} /> Translate
+                </button>
+            </div>
+        </div>
+    </motion.div>
+);
+
 const MessagePage = () => {
     const [focusMode, setFocusMode] = useState(false);
+    const [showWatchPiP, setShowWatchPiP] = useState(false);
+    const [activeChat, setActiveChat] = useState(1);
+    const [vanishMode, setVanishMode] = useState(false);
+
+    const CHATS = [
+        { id: 1, name: 'Alex Cyber', avatar: 'https://i.pravatar.cc/150?u=alex', active: true, priority: true, lastMsg: 'The new UI is insane!', time: '2m' },
+        { id: 2, name: 'Sarah Miller', avatar: 'https://i.pravatar.cc/150?u=sarah', active: false, priority: true, lastMsg: 'Can you check the PR?', time: '1h' },
+        { id: 3, name: 'NeonExplorer', avatar: 'https://i.pravatar.cc/150?u=neon', active: true, priority: false, lastMsg: 'Look at this code...', time: '3h' },
+        { id: 4, name: 'Design Bot', avatar: 'https://i.pravatar.cc/150?u=bot', active: true, priority: false, lastMsg: 'AI suggests a new color.', time: '5h' },
+    ];
+
+    const filteredChats = focusMode ? CHATS.filter(c => c.priority) : CHATS;
 
     return (
-        <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row max-w-7xl mx-auto overflow-hidden">
+        <div className="h-[calc(100vh-80px)] flex max-w-full mx-auto overflow-hidden bg-[#050505]">
             {/* Sidebar (30%) */}
-            <div className="w-full md:w-[30%] h-full border-r border-white/10 flex flex-col">
-                <div className="p-4 border-b border-white/10">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">Messages</h2>
-                        <button onClick={() => setFocusMode(!focusMode)} className={`p-2 rounded-full ${focusMode ? 'bg-purple-600 text-white' : 'bg-white/5 text-gray-400'}`}>
-                            <Shield size={18} />
+            <div className="w-[30%] h-full border-r border-white/10 flex flex-col bg-black/40 backdrop-blur-3xl">
+                <div className="p-6 border-b border-white/10">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]">Messages</h2>
+                        <button 
+                            onClick={() => setFocusMode(!focusMode)} 
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
+                                focusMode ? 'bg-purple-600 text-white shadow-[0_0_15px_#a855f7]' : 'bg-white/5 text-gray-400 border border-white/10'
+                            }`}
+                        >
+                            <Shield size={12} /> {focusMode ? 'FOCUS ON' : 'FOCUS'}
                         </button>
                     </div>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                        <input type="text" placeholder="Search chats..." className="w-full bg-white/5 backdrop-blur-md rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 border border-white/10" />
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-purple-400 transition-colors" size={16} />
+                        <input type="text" placeholder="Search priority threads..." className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 backdrop-blur-md transition-all" />
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
-                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                        <div key={i} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors">
+
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
+                    {filteredChats.map(chat => (
+                        <div 
+                            key={chat.id} 
+                            onClick={() => setActiveChat(chat.id)}
+                            className={`flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-all ${
+                                activeChat === chat.id ? 'bg-purple-500/10 border border-purple-500/20' : 'hover:bg-white/5'
+                            }`}
+                        >
                             <div className="relative">
-                                <img src={`https://i.pravatar.cc/150?img=${i}`} className="w-12 h-12 rounded-full border border-white/10" />
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black shadow-[0_0_8px_#22c55e]"></div>
+                                <img src={chat.avatar} className="w-14 h-14 rounded-full border-2 border-white/5 p-0.5" />
+                                {chat.active && (
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-[#050505] shadow-[0_0_10px_#22c55e]"></div>
+                                )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-center">
-                                    <h4 className="font-bold text-sm text-white truncate">Developer {i}</h4>
-                                    <span className="text-[10px] text-gray-500">12:45</span>
+                                <div className="flex justify-between items-center mb-1">
+                                    <h4 className="font-bold text-sm text-white truncate">{chat.name}</h4>
+                                    <span className="text-[10px] text-gray-500 font-medium">{chat.time}</span>
                                 </div>
-                                <p className="text-xs text-gray-400 truncate">Here is the snippet for the React hook...</p>
+                                <p className="text-xs text-gray-400 truncate font-light italic">"{chat.lastMsg}"</p>
                             </div>
                         </div>
                     ))}
@@ -758,75 +842,154 @@ const MessagePage = () => {
             </div>
 
             {/* Main Chat (45%) */}
-            <div className="hidden md:flex flex-col w-[45%] h-full relative bg-gradient-to-b from-transparent to-purple-900/10">
+            <div className="flex-1 h-full flex flex-col bg-gradient-to-b from-transparent to-purple-900/5 relative">
                 {/* Chat Header */}
-                <div className="p-4 border-b border-white/10 bg-black/50 backdrop-blur-xl flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <img src="https://i.pravatar.cc/150?img=1" className="w-10 h-10 rounded-full" />
+                <div className="p-4 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex justify-between items-center z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <img src={CHATS.find(c => c.id === activeChat)?.avatar} className="w-11 h-11 rounded-full border border-purple-500/50" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
+                        </div>
                         <div>
-                            <h3 className="font-bold text-white">Developer 1</h3>
-                            <p className="text-xs text-green-400">Online</p>
+                            <h3 className="font-black text-sm text-white tracking-wide">{CHATS.find(c => c.id === activeChat)?.name}</h3>
+                            <p className="text-[10px] text-purple-400 flex items-center gap-1 font-bold"><Shield size={10} /> End-to-End Encrypted</p>
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <GlowingButton className="text-xs py-1.5 px-3"><Youtube size={14} /> Watch Together</GlowingButton>
+                        <button onClick={() => setShowWatchPiP(true)} className="flex items-center gap-2 bg-purple-600/20 hover:bg-purple-600 text-purple-400 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-purple-500/30 transition-all shadow-lg">
+                            <Youtube size={16} /> Watch Together
+                        </button>
+                        <button className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 transition-colors">
+                            <MoreHorizontal size={20} />
+                        </button>
                     </div>
+                </div>
+
+                {/* AI Catch-up Banner */}
+                <div className="mx-6 mt-4 p-3 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 rounded-2xl flex justify-between items-center backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-500 rounded-lg shadow-[0_0_10px_#a855f7]"><Star size={14} /></div>
+                        <p className="text-[10px] font-medium text-gray-300">You have 12 unread messages. Want an <span className="text-purple-400 font-black uppercase">AI Catch-up</span> summary?</p>
+                    </div>
+                    <button className="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg text-[9px] font-black uppercase transition-colors">Generate</button>
                 </div>
 
                 {/* Chat Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    <div className="text-center text-xs text-gray-500 my-4">End-to-End Encrypted</div>
-
-                    <div className="flex justify-start">
-                        <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[80%] text-sm">
-                            Hey! Have you seen the new glassmorphism setup?
-                        </div>
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+                    <div className="text-center">
+                        <span className="text-[10px] text-gray-500 bg-white/5 px-3 py-1 rounded-full uppercase font-black tracking-widest">Today, 12:45 PM</span>
                     </div>
 
-                    <div className="flex justify-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 shadow-[0_0_15px_rgba(147,51,234,0.3)] rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%] text-sm font-medium">
-                            Yeah, it looks insanely premium. The performance is zero-lag too!
+                    <ChatBubble message={{ text: "Hey! Have you seen the new design tokens? The glassmorphism blur is exactly at 12px now.", time: "12:45 PM", avatar: CHATS[0].avatar }} isMe={false} />
+                    <ChatBubble message={{ text: "Yes! It looks incredibly premium. I'm also testing the purple gradient borders on the chat bubbles right now.", time: "12:46 PM" }} isMe={true} />
+                    <ChatBubble message={{ text: "Es impresionante cómo se siente el rendimiento sin lag.", time: "12:47 PM", avatar: CHATS[0].avatar, translated: "It's impressive how the performance feels without lag." }} isMe={false} />
+                </div>
+
+                {/* Floating Input Area */}
+                <div className="p-6 relative">
+                    {/* Smart Replies */}
+                    <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
+                        {["That sounds great!", "Show me more 🔥", "I'll check NexCloud", "Need help with code?"].map(chip => (
+                            <button key={chip} className="whitespace-nowrap px-4 py-1.5 bg-white/5 hover:bg-purple-600/20 border border-white/10 hover:border-purple-500/50 rounded-full text-[10px] font-medium text-gray-300 hover:text-purple-400 transition-all">
+                                {chip}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-2 pr-3 shadow-2xl focus-within:border-purple-500/50 transition-all">
+                        <button className="p-3 text-gray-400 hover:text-purple-400 hover:bg-white/5 rounded-full transition-all"><Paperclip size={20} /></button>
+                        <div className="flex-1 flex flex-col">
+                            <input type="text" placeholder="Type a message or use @ for NexCloud..." className="bg-transparent border-none focus:outline-none text-sm py-2 px-2 text-white" />
                         </div>
+                        <button className="p-3 text-gray-400 hover:text-purple-400 hover:bg-white/5 rounded-full transition-all"><Mic size={20} /></button>
+                        <button className="p-3.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full shadow-[0_10px_20px_rgba(147,51,234,0.4)] hover:scale-105 transition-transform">
+                            <Send size={18} fill="white" />
+                        </button>
+                    </div>
+                    <div className="flex justify-center mt-2">
+                        <p className="text-[8px] text-gray-500 font-black uppercase tracking-widest">Hold send to schedule message</p>
                     </div>
                 </div>
 
-                {/* Floating Input */}
-                <div className="p-4">
-                    <div className="flex items-center bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full px-2 py-2 shadow-2xl">
-                        <button className="p-2 text-gray-400 hover:text-white transition-colors"><Paperclip size={20} /></button>
-                        <input type="text" placeholder="Type a message..." className="flex-1 bg-transparent border-none focus:outline-none text-sm px-2" />
-                        <button className="p-2 text-purple-400 hover:text-purple-300 transition-colors"><Mic size={20} /></button>
-                        <button className="p-2 bg-purple-600 rounded-full ml-2 shadow-[0_0_10px_#a855f7]"><Send size={16} fill="white" /></button>
-                    </div>
-                </div>
+                {/* Draggable PiP */}
+                <AnimatePresence>
+                    {showWatchPiP && <WatchTogetherPiP url="test" onClose={() => setShowWatchPiP(false)} />}
+                </AnimatePresence>
             </div>
 
             {/* Details Panel (25%) */}
-            <div className="hidden lg:block w-[25%] h-full border-l border-white/10 p-4 overflow-y-auto">
-                <div className="flex flex-col items-center mb-6">
-                    <img src="https://i.pravatar.cc/150?img=1" className="w-24 h-24 rounded-full mb-3" />
-                    <h3 className="font-bold text-lg">Developer 1</h3>
-                    <p className="text-xs text-gray-400">CSE Department</p>
+            <div className="w-[25%] h-full border-l border-white/10 bg-black/60 backdrop-blur-3xl flex flex-col">
+                <div className="p-8 flex flex-col items-center border-b border-white/10 bg-gradient-to-b from-purple-900/10 to-transparent">
+                    <div className="relative mb-4">
+                        <img src={CHATS.find(c => c.id === activeChat)?.avatar} className="w-28 h-28 rounded-full border-4 border-purple-500/20 p-1" />
+                        <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-[#050505] rounded-full"></div>
+                    </div>
+                    <h3 className="text-xl font-black text-white">{CHATS.find(c => c.id === activeChat)?.name}</h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Full Stack Developer</p>
+                    <div className="flex gap-4 mt-6">
+                        <button className="flex flex-col items-center gap-1 group">
+                            <div className="p-3 bg-white/5 group-hover:bg-purple-600/20 rounded-2xl border border-white/10 group-hover:border-purple-500/50 transition-all"><User size={18} /></div>
+                            <span className="text-[8px] font-black uppercase text-gray-500">Profile</span>
+                        </button>
+                        <button className="flex flex-col items-center gap-1 group">
+                            <div className="p-3 bg-white/5 group-hover:bg-blue-600/20 rounded-2xl border border-white/10 group-hover:border-blue-500/50 transition-all"><Bell size={18} /></div>
+                            <span className="text-[8px] font-black uppercase text-gray-500">Mute</span>
+                        </button>
+                        <button className="flex flex-col items-center gap-1 group">
+                            <div className="p-3 bg-white/5 group-hover:bg-red-600/20 rounded-2xl border border-white/10 group-hover:border-red-500/50 transition-all"><Shield size={18} /></div>
+                            <span className="text-[8px] font-black uppercase text-gray-500">Search</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Code Vault</h4>
-                        <div className="bg-black/50 p-2 rounded text-[10px] font-mono text-green-400 border border-white/5">
-                            {'const init = () => {'} <br />
-                            &nbsp;&nbsp;console.log("Ready");<br />
-                            {'}'}
+                <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
+                    {/* Shared Media */}
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Shared Media</h4>
+                            <button className="text-[10px] text-purple-400 font-bold">View All</button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="aspect-square bg-white/5 rounded-xl overflow-hidden group relative cursor-pointer border border-white/5">
+                                    <img src={`https://picsum.photos/200/200?sig=${i + 200}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                    <div className="absolute inset-0 bg-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Shared Media</h4>
-                        <div className="grid grid-cols-3 gap-1">
-                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="aspect-square bg-gray-800 rounded">
-                                    <img src={`https://picsum.photos/200/200?sig=${i + 50}`} className="w-full h-full object-cover rounded" />
-                                </div>
-                            ))}
+                    {/* Code Vault */}
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Code Vault (CSE)</h4>
+                            <Grid size={14} className="text-gray-500" />
+                        </div>
+                        <div className="bg-black/80 rounded-2xl p-4 border border-purple-500/20 font-mono text-[10px] text-green-400/80 shadow-inner relative group">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button className="bg-white/10 p-1 rounded text-[8px] text-white">Copy</button>
+                            </div>
+                            <span className="text-purple-400">const</span> <span className="text-blue-400">NexSocial</span> = () =&gt; {"{"} <br />
+                            &nbsp;&nbsp;<span className="text-gray-500">// Initialize premium UI</span> <br />
+                            &nbsp;&nbsp;<span className="text-purple-400">return</span> <span className="text-yellow-400">renderMasterpiece</span>(); <br />
+                            {"}"}
+                        </div>
+                    </div>
+
+                    {/* Privacy Toggles */}
+                    <div className="space-y-4 pt-4 border-t border-white/10">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h4 className="text-xs font-bold text-white">Vanish Mode</h4>
+                                <p className="text-[9px] text-gray-500">Messages disappear after being seen</p>
+                            </div>
+                            <button onClick={() => setVanishMode(!vanishMode)} className={`w-10 h-5 rounded-full transition-all relative ${vanishMode ? 'bg-purple-600' : 'bg-white/10'}`}>
+                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${vanishMode ? 'right-1' : 'left-1'}`} />
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-green-500/5 border border-green-500/20 rounded-2xl">
+                            <Shield size={16} className="text-green-500" />
+                            <p className="text-[9px] text-green-500/80 leading-tight">This chat is secured with RSA-4096 Bit End-to-End Encryption.</p>
                         </div>
                     </div>
                 </div>
