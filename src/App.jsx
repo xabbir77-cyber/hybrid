@@ -11,6 +11,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 const MOCK_USERS = [
     { id: 1, name: 'Chloe Davis', code: '#87654321', avatar: 'https://i.pravatar.cc/150?u=chloe' },
     { id: 2, name: 'Alex Cyber', code: '#11223344', avatar: 'https://i.pravatar.cc/150?u=alex' },
+    { id: 3, name: 'NeonExplorer', code: '#44556677', avatar: 'https://i.pravatar.cc/150?u=neon' },
+    { id: 4, name: 'Sarah Miller', code: '#12121212', avatar: 'https://i.pravatar.cc/150?u=sarah' },
+];
+
+const INITIAL_POSTS = [
+    { id: 1, user: 'CyberArtist', avatar: 'https://i.pravatar.cc/150?img=33', image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80', caption: 'Deep diving into Neo-Tokyo architecture. #Cyberpunk', time: '2h ago', likes: 1240 },
+    { id: 2, user: 'DesignGuru', avatar: 'https://i.pravatar.cc/150?img=44', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80', caption: 'Glassmorphism is here to stay. Look at these textures.', time: '5h ago', likes: 890 },
 ];
 
 const NOTIFICATIONS = [
@@ -35,10 +42,11 @@ const GlowingButton = ({ children, className = "", onClick }) => (
 );
 
 // --- TOP NAVIGATION ---
-const TopNavigation = () => {
+const TopNavigation = ({ onSearch, users }) => {
     const [searchFocused, setSearchFocused] = useState(false);
     const [hasNewNotif, setHasNewNotif] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [query, setQuery] = useState('');
 
     // Simulate real-time incoming notification
     useEffect(() => {
@@ -61,6 +69,11 @@ const TopNavigation = () => {
                         type="text"
                         placeholder="Search by Name (@john) or Code (#1234)"
                         className="w-full bg-transparent border-none focus:outline-none text-sm text-white ml-3 placeholder-gray-500"
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                            onSearch(e.target.value);
+                        }}
                         onFocus={() => setSearchFocused(true)}
                         onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
                     />
@@ -71,9 +84,9 @@ const TopNavigation = () => {
                     {searchFocused && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                            className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-2xl z-50"
+                            className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-2xl z-50 max-h-64 overflow-y-auto"
                         >
-                            {MOCK_USERS.map(user => (
+                            {users.length > 0 ? users.map(user => (
                                 <div key={user.id} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-xl cursor-pointer">
                                     <div className="flex items-center gap-3">
                                         <img src={user.avatar} className="w-10 h-10 rounded-full" alt="avatar" />
@@ -84,7 +97,9 @@ const TopNavigation = () => {
                                     </div>
                                     <GlowingButton className="text-xs py-1 px-3">Add</GlowingButton>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="p-4 text-center text-gray-500 text-sm italic">No users found...</div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -135,40 +150,52 @@ const TopNavigation = () => {
 };
 
 // --- POST BOX (Status+) ---
-const StatusPostBox = () => (
-    <GlassCard className="p-4 mb-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-t border-white/20">
-        <div className="flex gap-3 mb-4">
-            <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full" />
-            <input
-                type="text"
-                placeholder="What's on your mind?"
-                className="bg-transparent border-none focus:outline-none w-full text-lg font-light text-white placeholder-gray-500"
-            />
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-            <button className="flex items-center justify-center gap-2 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-semibold transition-colors">
-                <Video size={16} /> Go Live
-            </button>
-            <button className="flex items-center justify-center gap-2 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-xl text-xs font-semibold transition-colors shadow-[inset_0_0_10px_rgba(147,51,234,0.1)]">
-                <ImageIcon size={16} /> Media
-            </button>
-            <button className="flex items-center justify-center gap-2 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 rounded-xl text-xs font-semibold transition-colors">
-                <Star size={16} /> Life Event
-            </button>
-        </div>
-    </GlassCard>
-);
+const StatusPostBox = ({ onPost }) => {
+    const [text, setText] = useState('');
+
+    const handlePost = () => {
+        if (!text.trim()) return;
+        onPost(text);
+        setText('');
+    };
+
+    return (
+        <GlassCard className="p-4 mb-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-t border-white/20">
+            <div className="flex gap-3 mb-4">
+                <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full" />
+                <input
+                    type="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePost()}
+                    placeholder="What's on your mind?"
+                    className="bg-transparent border-none focus:outline-none w-full text-lg font-light text-white placeholder-gray-500"
+                />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+                <button className="flex items-center justify-center gap-2 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-semibold transition-colors">
+                    <Video size={16} /> Go Live
+                </button>
+                <button onClick={handlePost} className="flex items-center justify-center gap-2 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-xl text-xs font-semibold transition-colors shadow-[inset_0_0_10px_rgba(147,51,234,0.1)]">
+                    <ImageIcon size={16} /> Post
+                </button>
+                <button className="flex items-center justify-center gap-2 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 rounded-xl text-xs font-semibold transition-colors">
+                    <Star size={16} /> Life Event
+                </button>
+            </div>
+        </GlassCard>
+    );
+};
 
 // --- FEED POST ---
 const FeedPost = ({ post }) => {
-    const [likes, setLikes] = useState(1240);
+    const [likes, setLikes] = useState(post.likes || 1240);
     const [liked, setLiked] = useState(false);
     const [showHeartPopup, setShowHeartPopup] = useState(false);
 
     const handleDoubleTap = () => {
         if (!liked) { setLiked(true); setLikes(l => l + 1); }
         setShowHeartPopup(true);
-        // Haptic feedback simulation
         if (navigator.vibrate) navigator.vibrate(50);
         setTimeout(() => setShowHeartPopup(false), 800);
     };
@@ -184,16 +211,22 @@ const FeedPost = ({ post }) => {
                     <div>
                         <h4 className="font-bold text-sm text-white">{post.user}</h4>
                         <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                            <Clock size={10} /> {post.time} • AI Suggested
+                            <Clock size={10} /> {post.time}
                         </div>
                     </div>
                 </div>
-                <MoreHorizontal className="text-gray-500" />
+                <MoreHorizontal className="text-gray-500 cursor-pointer" />
             </div>
 
             {/* Media with Double Tap */}
             <div className="relative aspect-video bg-black overflow-hidden cursor-pointer" onDoubleClick={handleDoubleTap}>
-                <img src={post.image} className="w-full h-full object-cover opacity-90" />
+                {post.image ? (
+                    <img src={post.image} className="w-full h-full object-cover opacity-90" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-8 text-center text-xl font-light italic">
+                        "{post.caption}"
+                    </div>
+                )}
                 <AnimatePresence>
                     {showHeartPopup && (
                         <motion.div
@@ -204,11 +237,6 @@ const FeedPost = ({ post }) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                {/* Floating Badge */}
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-white">
-                    Trending in Tech
-                </div>
             </div>
 
             {/* Action Bar */}
@@ -216,26 +244,16 @@ const FeedPost = ({ post }) => {
                 <div className="flex gap-4 mb-3">
                     <button onClick={() => { setLiked(!liked); setLikes(l => liked ? l - 1 : l + 1); }} className="flex items-center gap-1 group">
                         <Heart size={24} fill={liked ? "#ef4444" : "none"} className={`${liked ? 'text-red-500' : 'text-gray-300 group-hover:text-red-400'} transition-colors`} />
-                        {/* Gamified Number slot machine simulation */}
                         <motion.span key={likes} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="font-bold text-sm">
                             {likes.toLocaleString()}
                         </motion.span>
                     </button>
                     <button className="flex items-center gap-1 text-gray-300 hover:text-blue-400 transition-colors">
-                        <MessageSquare size={24} /> <span className="font-bold text-sm">342</span>
+                        <MessageSquare size={24} /> <span className="font-bold text-sm">24</span>
                     </button>
                     <button className="flex items-center gap-1 text-gray-300 hover:text-green-400 transition-colors">
                         <Send size={24} />
                     </button>
-                </div>
-
-                {/* AI Summary Previews */}
-                <div className="bg-white/5 rounded-lg p-3 mb-2 border-l-2 border-purple-500">
-                    <p className="text-[10px] text-purple-400 font-bold mb-1 uppercase tracking-wider">✨ AI Summary</p>
-                    <ul className="text-xs text-gray-300 space-y-1 list-disc list-inside">
-                        <li>New glassmorphism trends discussed.</li>
-                        <li>Performance optimizations in React.</li>
-                    </ul>
                 </div>
 
                 <p className="text-sm font-light">
@@ -249,14 +267,21 @@ const FeedPost = ({ post }) => {
 
 // --- PAGES ---
 
-const HomePage = () => (
+const HomePage = ({ posts, onPost }) => (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 pt-4 px-4 pb-24">
         {/* Left Sidebar (Desktop) */}
         <div className="hidden lg:block space-y-4 sticky top-24 h-max">
             <GlassCard className="p-4 space-y-2">
                 <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Shortcuts</h3>
                 {['Friends', 'Memories', 'Saved', 'Groups', 'Marketplace'].map(item => (
-                    <div key={item} className="p-3 hover:bg-white/10 rounded-xl cursor-pointer text-sm font-medium transition-colors">
+                    <div key={item} className="p-3 hover:bg-white/10 rounded-xl cursor-pointer text-sm font-medium transition-colors flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
+                            {item === 'Friends' && <Users size={18} />}
+                            {item === 'Memories' && <Clock size={18} />}
+                            {item === 'Saved' && <Star size={18} />}
+                            {item === 'Groups' && <Grid size={18} />}
+                            {item === 'Marketplace' && <Globe size={18} />}
+                        </div>
                         {item}
                     </div>
                 ))}
@@ -265,9 +290,9 @@ const HomePage = () => (
 
         {/* Main Feed (Center) */}
         <div className="col-span-1 lg:col-span-2">
-            <StatusPostBox />
+            <StatusPostBox onPost={onPost} />
 
-            {/* Omni-Creator OS Stories */}
+            {/* Stories */}
             <div className="flex gap-3 overflow-x-auto no-scrollbar mb-6 pb-2">
                 <div className="flex flex-col items-center gap-1 min-w-[70px] relative cursor-pointer group">
                     <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors">
@@ -277,7 +302,7 @@ const HomePage = () => (
                 </div>
                 {[1, 2, 3, 4, 5].map(i => (
                     <div key={i} className="flex flex-col items-center gap-1 min-w-[70px] cursor-pointer">
-                        <div className="p-[2px] rounded-full bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 animate-spin-slow">
+                        <div className="p-[2px] rounded-full bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600">
                             <div className="bg-black p-[2px] rounded-full">
                                 <img src={`https://i.pravatar.cc/150?img=${i + 10}`} className="w-14 h-14 rounded-full object-cover" />
                             </div>
@@ -289,7 +314,7 @@ const HomePage = () => (
 
             {/* Triple Filter */}
             <div className="flex bg-white/5 rounded-xl p-1 mb-6">
-                {['For You (AI)', 'Friends', 'Global Trends'].map((f, i) => (
+                {['For You', 'Friends', 'Trending'].map((f, i) => (
                     <button key={f} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${i === 0 ? 'bg-white/10 shadow-md text-white' : 'text-gray-500 hover:text-white'}`}>
                         {f}
                     </button>
@@ -297,14 +322,20 @@ const HomePage = () => (
             </div>
 
             {/* Posts Stream */}
-            <FeedPost post={{ user: 'CyberArtist', avatar: 'https://i.pravatar.cc/150?img=33', image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80', caption: 'Deep diving into Neo-Tokyo architecture. #Cyberpunk', time: '2h ago' }} />
-            <FeedPost post={{ user: 'DesignGuru', avatar: 'https://i.pravatar.cc/150?img=44', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80', caption: 'Glassmorphism is here to stay. Look at these textures.', time: '5h ago' }} />
+            <div className="space-y-6">
+                {posts.map(post => (
+                    <FeedPost key={post.id} post={post} />
+                ))}
+            </div>
         </div>
 
         {/* Right Sidebar (Desktop) */}
         <div className="hidden lg:block space-y-4 sticky top-24 h-max">
             <GlassCard className="p-4">
-                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Online Contacts</h3>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">Online Contacts</h3>
+                    <MoreHorizontal size={14} className="text-gray-500" />
+                </div>
                 <div className="space-y-3">
                     {[1, 2, 3, 4, 5].map(i => (
                         <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer">
@@ -538,25 +569,78 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
         </nav>
     );
 };
-
 // --- MAIN APP COMPONENT ---
 export default function App() {
     const [activeTab, setActiveTab] = useState('home');
+    const [posts, setPosts] = useState(INITIAL_POSTS);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState(MOCK_USERS);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setFilteredUsers(MOCK_USERS);
+            return;
+        }
+        const filtered = MOCK_USERS.filter(user => 
+            user.name.toLowerCase().includes(query.toLowerCase()) || 
+            user.code.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredUsers(filtered);
+    };
+
+    const handlePost = (text) => {
+        const newPost = {
+            id: Date.now(),
+            user: 'Admin User',
+            avatar: 'https://i.pravatar.cc/150?u=me',
+            caption: text,
+            time: 'Just now',
+            likes: 0
+        };
+        setPosts([newPost, ...posts]);
+    };
 
     const renderPage = () => {
         switch (activeTab) {
-            case 'home': return <HomePage />;
-            case 'watch': return <div className="p-10 text-center text-gray-500 h-screen">Reels View (See Hub for Party)</div>;
+            case 'home': return <HomePage posts={posts} onPost={handlePost} />;
+            case 'watch': return <WatchHubPage />;
             case 'hub': return <WatchHubPage />;
             case 'messages': return <MessagePage />;
-            case 'profile': return <div className="p-10 text-center text-gray-500">Profile Dashboard</div>;
-            default: return <HomePage />;
+            case 'profile': return (
+                <div className="max-w-4xl mx-auto p-4 pb-24">
+                    <GlassCard className="p-8 text-center mb-6">
+                        <img src="https://i.pravatar.cc/150?u=me" className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-purple-500 p-1" />
+                        <h2 className="text-3xl font-black">Admin User</h2>
+                        <p className="text-purple-400 font-bold mb-4">#99887766</p>
+                        <div className="flex justify-center gap-8 text-sm">
+                            <div><p className="font-black text-xl">{posts.filter(p => p.user === 'Admin User').length}</p><p className="text-gray-400">Posts</p></div>
+                            <div><p className="font-black text-xl">1.2k</p><p className="text-gray-400">Followers</p></div>
+                            <div><p className="font-black text-xl">450</p><p className="text-gray-400">Following</p></div>
+                        </div>
+                    </GlassCard>
+                    <div className="grid grid-cols-3 gap-2">
+                        {posts.filter(p => p.user === 'Admin User').map(post => (
+                            <div key={post.id} className="aspect-square bg-white/5 rounded-lg overflow-hidden group relative">
+                                {post.image ? (
+                                    <img src={post.image} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center p-2 text-[10px] italic bg-purple-500/10 text-center">
+                                        {post.caption}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+            default: return <HomePage posts={posts} onPost={handlePost} />;
         }
     };
 
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-purple-500/30">
-            <TopNavigation />
+            <TopNavigation onSearch={handleSearch} users={filteredUsers} />
 
             <main className="relative">
                 <AnimatePresence mode="wait">
@@ -574,7 +658,6 @@ export default function App() {
             </main>
 
             <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-
         </div>
     );
 }
