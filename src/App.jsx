@@ -352,72 +352,371 @@ const HomePage = ({ posts, onPost }) => (
     </div>
 );
 
-// Advanced Watch Party & YouTube Hub Page combined
-const WatchHubPage = () => (
-    <div className="max-w-7xl mx-auto p-4 pb-24 h-[calc(100vh-80px)] overflow-y-auto no-scrollbar">
-        {/* Cinematic Header */}
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                <MonitorPlay className="text-purple-500" /> Cinema-Social
-            </h2>
-            <GlowingButton className="text-xs py-2 px-4 shadow-[0_0_15px_rgba(147,51,234,0.4)]">
-                <Tv size={16} /> Cast to Smart TV
-            </GlowingButton>
+// --- ADVANCED WATCH COMPONENTS ---
+
+const WatchTopNav = ({ activeWatchTab, setActiveWatchTab }) => {
+    const tabs = [
+        { id: 'shorts', label: 'Shorts', icon: Play },
+        { id: 'reels', label: 'Reels', icon: Video },
+        { id: 'party', label: 'Party', icon: Tv },
+        { id: 'youtube', label: 'YouTube', icon: Youtube },
+    ];
+
+    return (
+        <div className="flex w-full bg-black/60 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.id}
+                    onClick={() => setActiveWatchTab(tab.id)}
+                    className={`flex-1 flex flex-col items-center py-3 transition-all relative ${activeWatchTab === tab.id ? 'text-purple-400' : 'text-gray-500 hover:text-gray-300'}`}
+                >
+                    <tab.icon size={20} className={activeWatchTab === tab.id ? 'animate-pulse' : ''} />
+                    <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{tab.label}</span>
+                    {activeWatchTab === tab.id && (
+                        <motion.div layoutId="watch-tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 shadow-[0_0_10px_#a855f7]" />
+                    )}
+                </button>
+            ))}
         </div>
+    );
+};
 
-        {/* The 4K Movie Player (Simulated) */}
-        <div className="w-full aspect-video bg-black rounded-2xl border border-white/10 relative overflow-hidden mb-6 shadow-2xl group">
-            <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1200&q=80" className="w-full h-full object-cover opacity-80" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+const ReelCard = ({ video, isActive }) => {
+    const [liked, setLiked] = useState(false);
+    const [showHeart, setShowHeart] = useState(false);
+    const videoRef = useRef(null);
 
-            {/* Live Sync Badge */}
-            <div className="absolute top-4 left-4 bg-red-600/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span> Live Sync
-            </div>
+    useEffect(() => {
+        if (isActive && videoRef.current) {
+            videoRef.current.play().catch(() => {});
+        } else if (videoRef.current) {
+            videoRef.current.pause();
+        }
+    }, [isActive]);
 
-            {/* Central Play Button */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-                    <Play size={32} fill="white" />
+    const handleLike = () => {
+        setLiked(!liked);
+        if (!liked) {
+            setShowHeart(true);
+            setTimeout(() => setShowHeart(false), 800);
+        }
+    };
+
+    return (
+        <div className="relative h-[calc(100vh-130px)] w-full snap-start bg-black flex items-center justify-center overflow-hidden">
+            {/* Video Player */}
+            <video
+                ref={videoRef}
+                src={video.url}
+                className="w-full h-full object-cover opacity-80"
+                loop
+                muted
+                playsInline
+                onClick={(e) => {
+                    const v = e.currentTarget;
+                    v.paused ? v.play() : v.pause();
+                }}
+                onDoubleClick={handleLike}
+            />
+
+            {/* Glassmorphism Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none" />
+
+            {/* Interaction Sidebar */}
+            <div className="absolute right-4 bottom-24 flex flex-col gap-6 items-center z-10">
+                <div className="flex flex-col items-center gap-1">
+                    <button onClick={handleLike} className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all group">
+                        <Heart size={28} fill={liked ? "#ef4444" : "none"} className={liked ? "text-red-500 scale-110" : "group-hover:text-red-400"} />
+                    </button>
+                    <span className="text-[10px] font-bold">124K</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                    <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
+                        <MessageSquare size={28} />
+                    </button>
+                    <span className="text-[10px] font-bold">4.2K</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                    <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
+                        <Send size={28} />
+                    </button>
+                    <span className="text-[10px] font-bold">Share</span>
+                </div>
+                <div className="w-12 h-12 rounded-full border-2 border-white/20 overflow-hidden animate-spin-slow">
+                    <img src={video.avatar} className="w-full h-full object-cover" />
                 </div>
             </div>
+
+            {/* Metadata Bottom */}
+            <div className="absolute bottom-6 left-4 right-16 z-10">
+                <div className="flex items-center gap-3 mb-3">
+                    <img src={video.avatar} className="w-10 h-10 rounded-full border-2 border-purple-500" />
+                    <div>
+                        <h4 className="font-black text-sm text-white flex items-center gap-2">
+                            @{video.user} <span className="bg-purple-600 text-[8px] px-1.5 py-0.5 rounded-full uppercase">Creator</span>
+                        </h4>
+                        <p className="text-[10px] text-gray-300">Original Audio • 2.4M uses</p>
+                    </div>
+                    <button className="ml-2 bg-white text-black px-4 py-1.5 rounded-full text-[10px] font-bold hover:bg-gray-200 transition-colors">Follow</button>
+                </div>
+                <p className="text-sm font-medium line-clamp-2 text-white mb-2">
+                    {video.caption} <span className="text-purple-400">#Trending #NexSocial #Cyberpunk2026</span>
+                </p>
+                {/* Audio Waveform Visualizer */}
+                <div className="flex items-end gap-[2px] h-4">
+                    {[...Array(20)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            animate={{ height: [4, 16, 8, 12, 4] }}
+                            transition={{ repeat: Infinity, duration: 0.5 + Math.random(), delay: i * 0.05 }}
+                            className="w-1 bg-purple-500/50 rounded-full"
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Heart Popup Animation */}
+            <AnimatePresence>
+                {showHeart && (
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1.5, opacity: 1 }} exit={{ scale: 0, opacity: 0 }}
+                        className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
+                    >
+                        <Heart size={100} fill="#ef4444" className="text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,0.8)]" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Progress Bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                <div className="h-full bg-purple-500 w-1/3 shadow-[0_0_10px_#a855f7]"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 overflow-hidden">
+                <motion.div
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="h-full bg-gradient-to-r from-purple-600 to-blue-500 shadow-[0_0_10px_#a855f7]"
+                />
             </div>
         </div>
+    );
+};
 
-        {/* Friends Carousel (Spatial Audio Active) */}
-        <div className="flex gap-4 overflow-x-auto no-scrollbar mb-8">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="flex flex-col items-center gap-2 min-w-[60px]">
-                    <div className={`p-1 rounded-full ${i === 1 ? 'bg-purple-500 animate-pulse shadow-[0_0_15px_#a855f7]' : 'bg-white/10'}`}>
-                        <img src={`https://i.pravatar.cc/150?img=${i + 30}`} className="w-12 h-12 rounded-full" />
+const ShortsFeed = () => {
+    const [activeIndex, setActiveIndex] = useState(0);
+    const containerRef = useRef(null);
+
+    const videos = [
+        { id: 1, user: 'CyberExplorer', url: 'https://assets.mixkit.co/videos/preview/mixkit-tech-animation-with-abstract-elements-and-glowing-lines-48356-large.mp4', avatar: 'https://i.pravatar.cc/150?u=1', caption: 'Exploring the NexCloud Hub Architecture. Zero lag, pure glass.' },
+        { id: 2, user: 'NeonDesigner', url: 'https://assets.mixkit.co/videos/preview/mixkit-abstract-modern-background-in-blue-and-purple-colors-48355-large.mp4', avatar: 'https://i.pravatar.cc/150?u=2', caption: 'The future of Glassmorphism is here. #DesignTrends' },
+        { id: 3, user: 'Web3Master', url: 'https://assets.mixkit.co/videos/preview/mixkit-abstract-digital-technology-background-with-dots-and-lines-48354-large.mp4', avatar: 'https://i.pravatar.cc/150?u=3', caption: 'Decentralized social networks are the way forward.' },
+    ];
+
+    const handleScroll = () => {
+        if (!containerRef.current) return;
+        const index = Math.round(containerRef.current.scrollTop / containerRef.current.clientHeight);
+        setActiveIndex(index);
+    };
+
+    return (
+        <div
+            ref={containerRef}
+            onScroll={handleScroll}
+            className="h-[calc(100vh-130px)] overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+        >
+            {videos.map((v, i) => (
+                <ReelCard key={v.id} video={v} isActive={activeIndex === i} />
+            ))}
+        </div>
+    );
+};
+
+const WatchPartyPage = () => {
+    const [showEmojis, setShowEmojis] = useState([]);
+
+    const spawnEmoji = (emoji) => {
+        const id = Date.now();
+        setShowEmojis(prev => [...prev, { id, emoji, left: Math.random() * 80 + 10 }]);
+        setTimeout(() => setShowEmojis(prev => prev.filter(e => e.id !== id)), 3000);
+    };
+
+    return (
+        <div className="h-[calc(100vh-130px)] flex flex-col p-4 bg-[#050505]">
+            {/* Player Area */}
+            <div className="relative aspect-video bg-black rounded-3xl border border-white/10 overflow-hidden shadow-2xl mb-6 group">
+                <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1200&q=80" className="w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 bg-purple-600/20 backdrop-blur-3xl rounded-full flex items-center justify-center border border-purple-500/50 cursor-pointer hover:scale-110 transition-transform">
+                        <Play size={40} fill="white" />
                     </div>
-                    <span className="text-xs text-gray-400">{i === 1 ? 'Speaking...' : 'Listening'}</span>
                 </div>
-            ))}
-        </div>
+                <div className="absolute top-4 left-4 bg-red-600/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span> Live Syncing
+                </div>
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                    <button className="bg-black/60 backdrop-blur-xl p-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all"><MonitorPlay size={18} /></button>
+                    <button className="bg-purple-600 p-2 rounded-xl shadow-[0_0_15px_#a855f7] border border-purple-400/50 transition-all"><Tv size={18} /></button>
+                </div>
+            </div>
 
-        {/* YouTube Grid Integration */}
-        <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Youtube className="text-red-500" /> Trending Hub</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-                <GlassCard key={i} className="group cursor-pointer">
-                    <div className="relative aspect-video bg-gray-900 overflow-hidden">
-                        <img src={`https://picsum.photos/600/400?sig=${i}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs">12:04</div>
+            {/* Friend Avatars Area */}
+            <div className="flex gap-4 overflow-x-auto no-scrollbar mb-6 pb-2">
+                {[...Array(8)].map((_, i) => (
+                    <div key={i} className="flex flex-col items-center gap-2 min-w-[70px]">
+                        <div className={`relative p-1 rounded-full border-2 ${i === 0 ? 'border-purple-500 animate-pulse shadow-[0_0_15px_#a855f7]' : 'border-white/10'}`}>
+                            <img src={`https://i.pravatar.cc/150?img=${i + 40}`} className="w-14 h-14 rounded-full" />
+                            {i === 0 && <div className="absolute -bottom-1 -right-1 bg-purple-600 p-1 rounded-full"><Mic size={10} /></div>}
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400">{i === 0 ? 'You' : `User ${i}`}</span>
                     </div>
-                    <div className="p-3">
-                        <h4 className="font-bold text-sm mb-1 line-clamp-2 text-white">Exploring the NexCloud Architecture - Tech Talk</h4>
-                        <p className="text-xs text-gray-400">NexSocial Official • 120K views</p>
+                ))}
+            </div>
+
+            {/* Social Chat Interaction Area */}
+            <div className="flex-1 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 flex flex-col overflow-hidden relative">
+                {/* Floating Emojis */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <AnimatePresence>
+                        {showEmojis.map(e => (
+                            <motion.div
+                                key={e.id}
+                                initial={{ y: 400, opacity: 0, scale: 0.5 }}
+                                animate={{ y: -100, opacity: 1, scale: 1.5 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 3, ease: "easeOut" }}
+                                style={{ left: `${e.left}%` }}
+                                className="absolute text-4xl"
+                            >
+                                {e.emoji}
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
+
+                <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                    <h3 className="font-black text-xs uppercase tracking-widest text-purple-400">Live Party Chat</h3>
+                    <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span className="text-[10px] font-bold">1.2K Watching</span>
                     </div>
-                </GlassCard>
-            ))}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
+                    <div className="flex gap-3">
+                        <img src="https://i.pravatar.cc/150?img=41" className="w-8 h-8 rounded-full" />
+                        <div className="bg-white/10 rounded-2xl rounded-tl-none px-4 py-2 text-xs">This scene is insane! 🍿</div>
+                    </div>
+                    <div className="flex gap-3 justify-end">
+                        <div className="bg-purple-600/80 rounded-2xl rounded-tr-none px-4 py-2 text-xs font-medium">Agree! The visuals are 10/10 🔥</div>
+                    </div>
+                </div>
+
+                {/* Interaction Footer */}
+                <div className="p-4 bg-black/40 backdrop-blur-2xl">
+                    <div className="flex gap-4 justify-around mb-4">
+                        {['🍿', '🔥', '❤️', '👏', '😲'].map(emoji => (
+                            <button key={emoji} onClick={() => spawnEmoji(emoji)} className="text-2xl hover:scale-125 transition-transform">{emoji}</button>
+                        ))}
+                    </div>
+                    <div className="flex gap-2">
+                        <input type="text" placeholder="Send a message..." className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                        <button className="bg-purple-600 p-2 rounded-full shadow-[0_0_10px_#a855f7]"><Send size={16} /></button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
+
+const YouTubeHub = () => {
+    const [query, setQuery] = useState('');
+    const [videos, setVideos] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+    return (
+        <div className="h-[calc(100vh-130px)] flex flex-col bg-[#050505] p-4 overflow-y-auto no-scrollbar">
+            {/* YouTube Search Bar */}
+            <div className="max-w-3xl mx-auto w-full mb-8">
+                <div className="relative group">
+                    <div className="absolute inset-0 bg-purple-600/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl px-6 py-4 backdrop-blur-3xl focus-within:border-purple-500 transition-all shadow-2xl">
+                        <Search size={22} className="text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search YouTube with NexSocial Intelligence..."
+                            className="w-full bg-transparent border-none focus:outline-none text-white px-4 text-lg font-light placeholder-gray-500"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
+                        <button className="bg-purple-600 px-6 py-2 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-purple-500 transition-colors shadow-[0_0_15px_#a855f7]">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Video Feed */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full">
+                {videos.map(i => (
+                    <GlassCard key={i} className="group cursor-pointer border-none shadow-none bg-transparent">
+                        <div className="relative aspect-video rounded-2xl overflow-hidden mb-3">
+                            <img src={`https://picsum.photos/800/450?sig=${i + 100}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                            <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white">12:45</div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center"><Play size={24} fill="white" /></div>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <img src={`https://i.pravatar.cc/150?img=${i + 50}`} className="w-10 h-10 rounded-full border border-white/10" />
+                            <div className="flex-1">
+                                <h4 className="font-bold text-sm text-white line-clamp-2 leading-tight group-hover:text-purple-400 transition-colors">Building a High-End Social Media App with Next-Gen Glassmorphism</h4>
+                                <p className="text-[10px] text-gray-400 mt-1 font-bold">NexSocial Tech • 1.2M views • 2 hours ago</p>
+                                <div className="flex gap-2 mt-2">
+                                    <button className="text-[10px] bg-white/5 hover:bg-purple-500/20 px-2 py-1 rounded border border-white/10 text-gray-400 hover:text-purple-400 transition-all flex items-center gap-1">
+                                        <Plus size={10} /> Save to NexCloud
+                                    </button>
+                                    <button className="text-[10px] bg-white/5 hover:bg-blue-500/20 px-2 py-1 rounded border border-white/10 text-gray-400 hover:text-blue-400 transition-all flex items-center gap-1">
+                                        <Send size={10} /> Post to Feed
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const WatchHubPage = () => {
+    const [activeWatchTab, setActiveWatchTab] = useState('shorts');
+
+    const renderWatchContent = () => {
+        switch (activeWatchTab) {
+            case 'shorts': return <ShortsFeed />;
+            case 'reels': return <ShortsFeed />; // Reels uses similar logic but can be themed differently
+            case 'party': return <WatchPartyPage />;
+            case 'youtube': return <YouTubeHub />;
+            default: return <ShortsFeed />;
+        }
+    };
+
+    return (
+        <div className="h-[calc(100vh-80px)] overflow-hidden flex flex-col">
+            <WatchTopNav activeWatchTab={activeWatchTab} setActiveWatchTab={setActiveWatchTab} />
+            <div className="flex-1 relative">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeWatchTab}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full h-full"
+                    >
+                        {renderWatchContent()}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
 
 // Advanced Direct Message Page
 const MessagePage = () => {
@@ -640,7 +939,9 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-purple-500/30">
-            <TopNavigation onSearch={handleSearch} users={filteredUsers} />
+            {activeTab !== 'watch' && activeTab !== 'hub' && (
+                <TopNavigation onSearch={handleSearch} users={filteredUsers} />
+            )}
 
             <main className="relative">
                 <AnimatePresence mode="wait">
