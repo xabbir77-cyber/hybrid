@@ -1031,6 +1031,215 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
         </nav>
     );
 };
+// --- ADVANCED PROFILE COMPONENTS ---
+
+const SkeletonShimmer = () => (
+    <div className="animate-pulse space-y-4">
+        <div className="h-48 bg-white/5 rounded-3xl"></div>
+        <div className="flex gap-4">
+            <div className="w-24 h-24 bg-white/5 rounded-full"></div>
+            <div className="flex-1 space-y-2 py-4">
+                <div className="h-4 bg-white/5 rounded w-1/2"></div>
+                <div className="h-3 bg-white/5 rounded w-1/4"></div>
+            </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+            <div className="h-32 bg-white/5 rounded-2xl"></div>
+            <div className="h-32 bg-white/5 rounded-2xl"></div>
+            <div className="h-32 bg-white/5 rounded-2xl"></div>
+        </div>
+    </div>
+);
+
+const ProfilePage = () => {
+    const [loading, setLoading] = useState(true);
+    const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 1500);
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                setShowCommandPalette(true);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    if (loading) return <div className="max-w-7xl mx-auto p-4"><SkeletonShimmer /></div>;
+
+    return (
+        <div className="max-w-7xl mx-auto pb-24 relative">
+            {/* Header Hub */}
+            <div className="relative mb-20 px-4 pt-4">
+                <div className="h-64 md:h-80 w-full rounded-[2.5rem] overflow-hidden relative border border-white/10 group">
+                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=1200&q=80" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/20"></div>
+                    <div className="absolute bottom-6 right-6 flex gap-2">
+                        <button className="bg-white/10 backdrop-blur-xl px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 hover:bg-white/20 transition-all">Edit Cover</button>
+                    </div>
+                </div>
+
+                {/* Avatar & Basic Info */}
+                <div className="absolute -bottom-16 left-12 flex flex-col md:flex-row items-end gap-6">
+                    <div className="relative p-1 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 shadow-[0_0_30px_rgba(147,51,234,0.4)]">
+                        <div className="bg-[#050505] p-1 rounded-full">
+                            <img src="https://i.pravatar.cc/150?u=me" className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" />
+                        </div>
+                        <div className="absolute bottom-3 right-3 w-6 h-6 bg-green-500 border-4 border-[#050505] rounded-full"></div>
+                    </div>
+                    <div className="mb-6">
+                        <h2 className="text-4xl font-black text-white flex items-center gap-3">
+                            Admin User <Shield className="text-purple-500" size={24} />
+                        </h2>
+                        <p className="text-purple-400 font-bold tracking-widest uppercase text-xs mt-1">Full Stack Architect & UI/UX Visionary</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Engagement Analytics Strip */}
+            <div className="mx-4 mb-8 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 flex flex-wrap justify-around gap-6 items-center shadow-2xl">
+                {[
+                    { label: 'Profile Traffic', val: '+24%', color: 'text-purple-400' },
+                    { label: 'Engagement', val: '98.2', color: 'text-blue-400' },
+                    { label: 'Project Views', val: '12.4K', color: 'text-green-400' },
+                    { label: 'Retention', val: '84%', color: 'text-yellow-400' },
+                ].map(stat => (
+                    <div key={stat.label} className="text-center group cursor-pointer">
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                        <div className="flex items-center gap-2 justify-center">
+                            <span className={`text-2xl font-black ${stat.color}`}>{stat.val}</span>
+                            <div className="w-12 h-6 flex items-end gap-[2px]">
+                                {[1, 2, 3, 4].map(i => <div key={i} className={`w-1 bg-current ${stat.color} opacity-30 rounded-full`} style={{ height: `${Math.random() * 100}%` }}></div>)}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4">
+                {/* Left Sidebar (SEO Ready) */}
+                <div className="lg:col-span-4 space-y-6">
+                    <GlassCard className="p-6 border-none bg-white/5">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Structural Identity</h4>
+                        <div className="space-y-6">
+                            <div className="flex gap-4 items-start">
+                                <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20 text-purple-400"><MonitorPlay size={18} /></div>
+                                <div>
+                                    <p className="text-xs font-black text-white">Principal Architect</p>
+                                    <p className="text-[10px] text-gray-500 font-bold mt-1 uppercase">at Hybrid Dynamics Global</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 items-start">
+                                <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20 text-blue-400"><Grid size={18} /></div>
+                                <div>
+                                    <p className="text-xs font-black text-white">Current Projects</p>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {['NexSocial', 'CloudScale', 'AI-Vision'].map(p => (
+                                            <span key={p} className="text-[9px] bg-white/5 px-2 py-1 rounded-lg border border-white/10 text-gray-400">{p}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 items-start">
+                                <div className="p-3 bg-green-500/10 rounded-2xl border border-green-500/20 text-green-400"><Shield size={18} /></div>
+                                <div>
+                                    <p className="text-xs font-black text-white">Tech Stack</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">React, Next.js, Node.js, TailwindCSS, Framer Motion, PostgreSQL, AI/ML Engineering.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button className="w-full mt-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Download Full Dossier</button>
+                    </GlassCard>
+
+                    <GlassCard className="p-6 border-none bg-white/5">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Network Activity</h4>
+                        <div className="flex -space-x-3">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <img key={i} src={`https://i.pravatar.cc/150?img=${i + 10}`} className="w-10 h-10 rounded-full border-2 border-[#050505]" />
+                            ))}
+                            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-[10px] font-black border-2 border-[#050505]">+42</div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 font-bold mt-4">Mutual connections with NexSocial Core Team</p>
+                    </GlassCard>
+                </div>
+
+                {/* Right Content Feed (Asymmetric) */}
+                <div className="lg:col-span-8 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[1, 2, 3, 4].map(i => (
+                            <motion.div
+                                key={i}
+                                whileHover={{ y: -10, scale: 1.02 }}
+                                className={`bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden group relative cursor-pointer ${i % 3 === 0 ? 'md:col-span-2' : ''}`}
+                            >
+                                <div className="relative aspect-video overflow-hidden">
+                                    <img src={`https://picsum.photos/800/600?sig=${i + 300}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-80"></div>
+                                    <div className="absolute top-4 left-4 flex gap-2">
+                                        <span className="bg-purple-600/80 backdrop-blur-md text-[8px] font-black px-2 py-1 rounded-lg uppercase">System Update</span>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <h5 className="text-lg font-black text-white mb-2 leading-tight">Implementing Neural Networks into the NexSocial Feed Algorithm</h5>
+                                    <p className="text-xs text-gray-400 font-light line-clamp-2">Exploration of how we used transformer models to personalize the 2026 futuristic feed experience...</p>
+                                    <div className="flex justify-between items-center mt-6">
+                                        <div className="flex gap-4">
+                                            <button className="flex items-center gap-1.5 text-gray-400 hover:text-purple-400 transition-colors">
+                                                <Heart size={14} /> <span className="text-[10px] font-bold">1.2K</span>
+                                            </button>
+                                            <button className="flex items-center gap-1.5 text-gray-400 hover:text-blue-400 transition-colors">
+                                                <MessageSquare size={14} /> <span className="text-[10px] font-bold">42</span>
+                                            </button>
+                                        </div>
+                                        <button className="p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"><Send size={14} /></button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Floating Action Button */}
+            <motion.button
+                animate={{ scale: [1, 1.05, 1], boxShadow: ["0 0 0px #a855f7", "0 0 20px #a855f7", "0 0 0px #a855f7"] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="fixed bottom-24 right-8 bg-purple-600 text-white flex items-center gap-3 px-6 py-4 rounded-3xl font-black uppercase tracking-widest text-xs z-50 shadow-2xl"
+            >
+                <Plus size={20} /> Connect Now
+            </motion.button>
+
+            {/* Command Palette Modal */}
+            <AnimatePresence>
+                {showCommandPalette && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCommandPalette(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-xl bg-gray-900 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl">
+                            <div className="p-6 border-b border-white/10 flex items-center gap-4">
+                                <Search className="text-purple-500" size={24} />
+                                <input autoFocus type="text" placeholder="Unified Command Palette (Search, Navigate, Act...)" className="w-full bg-transparent border-none focus:outline-none text-xl font-light text-white" />
+                            </div>
+                            <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+                                {['Go to Feed', 'Search Users', 'Open Code Vault', 'Check Watch Sync', 'Privacy Settings'].map((cmd, i) => (
+                                    <div key={cmd} className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl cursor-pointer group transition-colors">
+                                        <span className="text-sm text-gray-300 group-hover:text-white">{cmd}</span>
+                                        <span className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-500">⌘{i + 1}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 export default function App() {
     const [activeTab, setActiveTab] = useState('home');
@@ -1069,33 +1278,12 @@ export default function App() {
             case 'watch': return <WatchHubPage />;
             case 'hub': return <WatchHubPage />;
             case 'messages': return <MessagePage />;
-            case 'profile': return (
-                <div className="max-w-4xl mx-auto p-4 pb-24">
-                    <GlassCard className="p-8 text-center mb-6">
-                        <img src="https://i.pravatar.cc/150?u=me" className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-purple-500 p-1" />
-                        <h2 className="text-3xl font-black">Admin User</h2>
-                        <p className="text-purple-400 font-bold mb-4">#99887766</p>
-                        <div className="flex justify-center gap-8 text-sm">
-                            <div><p className="font-black text-xl">{posts.filter(p => p.user === 'Admin User').length}</p><p className="text-gray-400">Posts</p></div>
-                            <div><p className="font-black text-xl">1.2k</p><p className="text-gray-400">Followers</p></div>
-                            <div><p className="font-black text-xl">450</p><p className="text-gray-400">Following</p></div>
-                        </div>
-                    </GlassCard>
-                    <div className="grid grid-cols-3 gap-2">
-                        {posts.filter(p => p.user === 'Admin User').map(post => (
-                            <div key={post.id} className="aspect-square bg-white/5 rounded-lg overflow-hidden group relative">
-                                {post.image ? (
-                                    <img src={post.image} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center p-2 text-[10px] italic bg-purple-500/10 text-center">
-                                        {post.caption}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
+            case 'profile': return <ProfilePage />;
+            default: return <HomePage posts={posts} onPost={handlePost} />;
+        }
+    };
+
+// --- MAIN APP COMPONENT ---
             default: return <HomePage posts={posts} onPost={handlePost} />;
         }
     };
