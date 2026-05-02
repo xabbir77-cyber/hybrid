@@ -7,7 +7,7 @@ import FeedPost from '../components/feed/FeedPost';
 import StoryTray from '../components/feed/StoryTray';
 import { SkeletonPost } from '../components/common/SkeletonLoader';
 
-const HomePage = ({ posts, onPost, setTab }) => {
+const HomePage = ({ posts, onPost, setTab, user }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [activeFilter, setActiveFilter] = useState('For You (AI)');
 
@@ -61,7 +61,7 @@ const HomePage = ({ posts, onPost, setTab }) => {
                             Header: () => (
                                 <div className="mb-6">
                                     <StoryTray />
-                                    <StatusPostBox onPost={onPost} />
+                                    <StatusPostBox onPost={onPost} user={user} />
                                     
                                     {/* Triple Filter System */}
                                     <div className="sticky top-0 z-40 py-2 bg-[#020205]/80 backdrop-blur-md mb-6">

@@ -34,37 +34,39 @@ const TopNavigation = ({ onSearch, users = [], isLoadingSearch, setTab }) => {
                     </div>
                 </motion.div>
 
-                {/* Universal Search */}
-                <UniversalSearch users={users} onSearch={onSearch} isLoading={isLoadingSearch} />
+                {/* Universal Search - Increased width */}
+                <div className="flex-1 max-w-2xl">
+                    <UniversalSearch users={users} onSearch={onSearch} isLoading={isLoadingSearch} />
+                </div>
 
                 {/* Action Icons & Profile */}
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        {/* Friends Icon */}
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        {/* Friends Icon - Smaller */}
                         <motion.button 
                             onClick={() => setTab('friends')}
-                            className={`p-3 text-gray-400 hover:text-cyan-400 glass-effect rounded-2xl transition-all relative ${hasNewRequests ? 'pulse-red-glow' : ''}`}
-                            whileHover={{ y: -2 }}
+                            className={`p-2.5 text-gray-400 hover:text-cyan-400 glass-effect rounded-xl transition-all relative ${hasNewRequests ? 'pulse-red-glow' : ''}`}
+                            whileHover={{ y: -1 }}
                         >
-                            <Users size={20} />
+                            <Users size={18} />
                             {hasNewRequests && (
-                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
                             )}
                         </motion.button>
 
-                        {/* Notification Icon */}
+                        {/* Notification Icon - Smaller */}
                         <motion.button 
-                            className={`p-3 text-gray-400 hover:text-cyan-400 glass-effect rounded-2xl transition-all relative ${unreadCount > 0 ? 'pulse-red-glow' : ''}`}
-                            whileHover={{ y: -2 }}
+                            className={`p-2.5 text-gray-400 hover:text-cyan-400 glass-effect rounded-xl transition-all relative ${unreadCount > 0 ? 'pulse-red-glow' : ''}`}
+                            whileHover={{ y: -1 }}
                         >
-                            <Bell size={20} />
+                            <Bell size={18} />
                             {unreadCount > 0 && (
-                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
                             )}
                         </motion.button>
                     </div>
 
-                    <div className="w-[1px] h-8 bg-white/10 mx-2"></div>
+                    <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
 
                     {/* Profile Menu Component */}
                     <ProfileMenu user={user} />

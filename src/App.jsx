@@ -47,13 +47,13 @@ export default function App() {
 
     const renderPage = () => {
         switch (activeTab) {
-            case 'home': return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} />;
+            case 'home': return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} user={user} />;
             case 'watch': return <WatchPage />;
             case 'explore': return <ExplorePage />;
             case 'messages': return <MessagePage />;
             case 'profile': return <ProfilePage />;
             case 'friends': return <FriendsPage />;
-            default: return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} />;
+            default: return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} user={user} />;
         }
     };
 

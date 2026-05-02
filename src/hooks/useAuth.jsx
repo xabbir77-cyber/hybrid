@@ -50,9 +50,18 @@ export const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
-    const loginWithGoogle = () => {
+    const loginWithGoogle = async () => {
         const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
+        try {
+            return await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Google Login Error:", error.code, error.message);
+            if (error.code === 'auth/unauthorized-domain') {
+                alert("Error: This domain is not authorized in Firebase. Please add 'hybrid-4yr.pages.dev' to your Firebase Authentication settings > Authorized Domains.");
+            } else {
+                alert("Login failed: " + error.message);
+            }
+        }
     };
 
     const logout = () => {
