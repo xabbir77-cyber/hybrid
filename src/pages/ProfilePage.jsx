@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, MonitorPlay, Grid, User, Bell, Plus, MessageSquare, Heart, Send } from 'lucide-react';
+import { Shield, MonitorPlay, Grid, User, Bell, Plus, MessageSquare, Heart, Send, LogOut } from 'lucide-react';
 import GlassCard from '../components/common/GlassCard';
 import SkeletonLoader from '../components/common/SkeletonLoader';
+import { useAuth } from '../hooks/useAuth';
 
 const ProfilePage = () => {
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1500);
-        return () => clearTimeout(timer);
-    }, []);
+    const { user, loginWithGoogle, logout, loading } = useAuth();
 
     if (loading) return (
         <div className="max-w-7xl mx-auto p-4 space-y-8">
@@ -22,6 +18,26 @@ const ProfilePage = () => {
                     <SkeletonLoader className="h-4 w-32" />
                 </div>
             </div>
+        </div>
+    );
+
+    if (!user) return (
+        <div className="h-[calc(100vh-80px)] flex flex-col items-center justify-center p-4">
+            <GlassCard className="max-w-md w-full p-12 text-center relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="w-24 h-24 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-purple-500/30">
+                    <User size={48} className="text-purple-400" />
+                </div>
+                <h2 className="text-3xl font-black text-white mb-4">Join the Experience</h2>
+                <p className="text-gray-400 mb-8 font-light italic">Access your personalized infinite feed and sync your digital world across the Hybrid network.</p>
+                <button 
+                    onClick={loginWithGoogle}
+                    className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95"
+                >
+                    Login with Google
+                </button>
+                <p className="text-[10px] text-gray-600 mt-6 uppercase tracking-[0.2em]">Secure Authentication via Firebase</p>
+            </GlassCard>
         </div>
     );
 
@@ -38,16 +54,22 @@ const ProfilePage = () => {
                 <div className="absolute -bottom-16 left-12 flex flex-col md:flex-row items-end gap-6">
                     <div className="relative p-1 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 shadow-[0_0_30px_rgba(147,51,234,0.4)]">
                         <div className="bg-[#050505] p-1 rounded-full">
-                            <img src="https://i.pravatar.cc/150?u=me" className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" alt="avatar" />
+                            <img src={user.photoURL || "https://i.pravatar.cc/150?u=me"} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" alt="avatar" />
                         </div>
                         <div className="absolute bottom-3 right-3 w-6 h-6 bg-green-500 border-4 border-[#050505] rounded-full"></div>
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-6 flex-1">
                         <h2 className="text-4xl font-black text-white flex items-center gap-3">
-                            Admin User <Shield className="text-purple-500" size={24} />
+                            {user.displayName} <Shield className="text-purple-500" size={24} />
                         </h2>
-                        <p className="text-purple-400 font-bold tracking-widest uppercase text-xs mt-1">Digital Architect & UI Enthusiast</p>
+                        <p className="text-purple-400 font-bold tracking-widest uppercase text-xs mt-1">{user.email}</p>
                     </div>
+                    <button 
+                        onClick={logout}
+                        className="mb-8 p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl border border-red-500/20 transition-all"
+                    >
+                        <LogOut size={20} />
+                    </button>
                 </div>
             </div>
 
