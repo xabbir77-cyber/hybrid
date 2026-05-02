@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Image, Video, Calendar, Sparkles, Wand2, Send, Mic, Poll, Smile, Clock, Camera, FileVideo, Zap, Globe, ShieldCheck } from 'lucide-react';
+import { Image, Video, Calendar, Sparkles, Wand2, Send, Mic, Vote, Smile, Clock, Camera, FileVideo, Zap, Globe, ShieldCheck } from 'lucide-react';
 
 const StatusPostBox = ({ onPost, user }) => {
     const [text, setText] = useState('');
@@ -132,7 +132,7 @@ const StatusPostBox = ({ onPost, user }) => {
                             <div className="flex items-center justify-between">
                                 <div className="flex gap-6 px-2">
                                     {[
-                                        { icon: Poll, color: 'hover:text-purple-400', label: 'Poll' },
+                                        { icon: Vote, color: 'hover:text-purple-400', label: 'Poll' },
                                         { icon: Smile, color: 'hover:text-yellow-400', label: 'Mood' },
                                         { icon: Clock, color: 'hover:text-cyan-400', label: 'Schedule' },
                                     ].map((btn, i) => (
