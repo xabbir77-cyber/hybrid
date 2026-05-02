@@ -23,17 +23,40 @@ export const useMessages = (activeConversationId) => {
     useEffect(() => {
         if (!user) return;
 
-        const convRef = collection(db, 'conversations');
-        const q = query(convRef, where('participants', 'array-contains', user.uid), orderBy('lastMessageAt', 'desc'));
+        let unsubscribe = () => {};
+        try {
+            const convRef = collection(db, 'conversations');
+            // This requires a composite index: participants (array-contains), lastMessageAt (desc)
+            const q = query(convRef, where('participants', 'array-contains', user.uid), orderBy('lastMessageAt', 'desc'));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetched = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setConversations(fetched);
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                const fetched = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setConversations(fetched);
+                setLoading(false);
+            }, (err) => {
+                console.error("Conversation Fetch Error:", err);
+                setLoading(false);
+                
+                // Fallback: If index missing, just fetch conversations without specific ordering
+                if (err.code === 'failed-precondition') {
+                    console.warn("Conversations index missing. Falling back to simple query.");
+                    const fallbackQ = query(convRef, where('participants', 'array-contains', user.uid));
+                    onSnapshot(fallbackQ, (fallbackSnap) => {
+                        const fallbackData = fallbackSnap.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        setConversations(fallbackData);
+                    });
+                }
+            });
+        } catch (err) {
+            console.error("Conversation Init Error:", err);
             setLoading(false);
-        });
+        }
 
         return () => unsubscribe();
     }, [user]);

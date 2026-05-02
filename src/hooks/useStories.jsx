@@ -18,44 +18,78 @@ export const useStories = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch stories from the last 24 hours
-        const yesterday = new Date();
-        yesterday.setHours(yesterday.getHours() - 24);
-        const yesterdayTimestamp = Timestamp.fromDate(yesterday);
+        let unsubscribe = () => {};
 
-        const storiesRef = collection(db, 'stories');
-        const q = query(
-            storiesRef, 
-            where('createdAt', '>=', yesterdayTimestamp),
-            orderBy('createdAt', 'desc')
-        );
+        try {
+            // Fetch stories from the last 24 hours
+            const yesterday = new Date();
+            yesterday.setHours(yesterday.getHours() - 24);
+            const yesterdayTimestamp = Timestamp.fromDate(yesterday);
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetched = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const storiesRef = collection(db, 'stories');
+            // This requires a composite index: createdAt (>=), createdAt (desc)
+            const q = query(
+                storiesRef, 
+                where('createdAt', '>=', yesterdayTimestamp),
+                orderBy('createdAt', 'desc')
+            );
 
-            // Group by user
-            const grouped = fetched.reduce((acc, story) => {
-                if (!acc[story.uid]) {
-                    acc[story.uid] = {
-                        uid: story.uid,
-                        userName: story.userName,
-                        userAvatar: story.userAvatar,
-                        stories: []
-                    };
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                const fetched = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Group by user
+                const grouped = fetched.reduce((acc, story) => {
+                    if (!acc[story.uid]) {
+                        acc[story.uid] = {
+                            uid: story.uid,
+                            userName: story.userName,
+                            userAvatar: story.userAvatar,
+                            stories: []
+                        };
+                    }
+                    acc[story.uid].stories.push(story);
+                    return acc;
+                }, {});
+
+                setStories(Object.values(grouped));
+                setLoading(false);
+            }, (err) => {
+                console.error("Story Fetch Error:", err);
+                setLoading(false);
+
+                // Fallback: If index missing, just fetch latest stories without time filter
+                if (err.code === 'failed-precondition') {
+                    console.warn("Stories index missing. Falling back to simple query.");
+                    const fallbackQ = query(storiesRef, orderBy('createdAt', 'desc'));
+                    onSnapshot(fallbackQ, (fallbackSnap) => {
+                        const fetchedFallback = fallbackSnap.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        // Grouping logic remains same
+                        const groupedFallback = fetchedFallback.reduce((acc, story) => {
+                            if (!acc[story.uid]) {
+                                acc[story.uid] = {
+                                    uid: story.uid,
+                                    userName: story.userName,
+                                    userAvatar: story.userAvatar,
+                                    stories: []
+                                };
+                            }
+                            acc[story.uid].stories.push(story);
+                            return acc;
+                        }, {});
+                        setStories(Object.values(groupedFallback));
+                    });
                 }
-                acc[story.uid].stories.push(story);
-                return acc;
-            }, {});
-
-            setStories(Object.values(grouped));
+            });
+        } catch (err) {
+            console.error("Story Initialization Error:", err);
             setLoading(false);
-        }, (err) => {
-            console.error("Story Fetch Error:", err);
-            setLoading(false);
-        });
+        }
 
         return () => unsubscribe();
     }, []);

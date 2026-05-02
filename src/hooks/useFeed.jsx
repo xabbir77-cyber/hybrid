@@ -19,28 +19,50 @@ export const useFeed = (filter = 'For You (AI)') => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const postsRef = collection(db, 'posts');
-        let q;
+        let unsubscribe = () => {};
+        
+        try {
+            const postsRef = collection(db, 'posts');
+            let q;
 
-        if (filter === 'Global Trends') {
-            q = query(postsRef, orderBy('likes', 'desc'), orderBy('createdAt', 'desc'));
-        } else {
-            // Simplistic 'For You' - just latest for now
-            q = query(postsRef, orderBy('createdAt', 'desc'));
-        }
+            if (filter === 'Global Trends') {
+                // This requires a composite index: likes (desc), createdAt (desc)
+                q = query(postsRef, orderBy('likes', 'desc'), orderBy('createdAt', 'desc'));
+            } else {
+                // Simplistic 'For You' - just latest for now
+                q = query(postsRef, orderBy('createdAt', 'desc'));
+            }
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedPosts = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setPosts(fetchedPosts);
-            setLoading(false);
-        }, (err) => {
-            console.error("Error fetching feed:", err);
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                const fetchedPosts = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setPosts(fetchedPosts);
+                setLoading(false);
+            }, (err) => {
+                console.error("Error fetching feed:", err);
+                setError(err);
+                setLoading(false);
+                
+                // Fallback: Try a simpler query if the first one fails (likely due to missing index)
+                if (err.code === 'failed-precondition' && filter === 'Global Trends') {
+                    console.warn("Global Trends index missing. Falling back to simple query.");
+                    const fallbackQ = query(postsRef, orderBy('createdAt', 'desc'));
+                    onSnapshot(fallbackQ, (fallbackSnap) => {
+                        const fallbackPosts = fallbackSnap.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        setPosts(fallbackPosts);
+                    });
+                }
+            });
+        } catch (err) {
+            console.error("Feed Initialization Error:", err);
             setError(err);
             setLoading(false);
-        });
+        }
 
         return () => unsubscribe();
     }, [filter]);
