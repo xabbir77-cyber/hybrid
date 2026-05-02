@@ -127,9 +127,36 @@ body {
   100% { background-position: 200% 0; }
 }
 
-.neon-border-gradient {
+  .neon-border-gradient {
   background: linear-gradient(var(--bg-deep-navy), var(--bg-deep-navy)) padding-box,
               linear-gradient(to right, var(--neon-cyan), var(--electric-blue)) border-box;
   border: 1px solid transparent;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.mask-fade-right {
+  mask-image: linear-gradient(to right, black 80%, transparent 100%);
 }
 

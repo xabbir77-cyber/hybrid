@@ -1,27 +1,66 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
-    function isAuthenticated() {
+    
+    // Helper functions
+    function isSignedIn() {
       return request.auth != null;
     }
-
-    // Rules for the 'posts' collection
-    match /posts/{postId} {
-      allow read: if true; // Allow everyone to see the feed
-      allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && (resource.data.uid == request.auth.uid);
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
-    // Rules for the 'users' collection
+    // User Profiles
     match /users/{userId} {
-      allow read: if true; // Allow users to be searched
-      allow write: if isAuthenticated() && request.auth.uid == userId;
-      
-      match /notifications/{noteId} {
-        allow read, update: if isAuthenticated() && request.auth.uid == userId;
-        allow create: if isAuthenticated();
-      }
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId);
+    }
+
+    // Posts & Feed
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+
+    // Stories (24h expiry logic is handled by query, but rules protect access)
+    match /stories/{storyId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+
+    // Conversations & Messages
+    match /conversations/{convId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants;
+    }
+    
+    match /conversations/{convId}/messages/{msgId} {
+      allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+      allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+    }
+
+    // Social (Friend Requests & Friends)
+    match /friendRequests/{requestId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.from || request.auth.uid == resource.data.to);
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (request.auth.uid == resource.data.from || request.auth.uid == resource.data.to);
+    }
+
+    // Watch Parties
+    match /watchParties/{roomId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // Allow anyone to update state for global sync, or restrict to participants
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && request.auth.uid == resource.data.to;
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner(resource.data.to);
     }
   }
 }

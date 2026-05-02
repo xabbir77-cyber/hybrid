@@ -1,15 +1,33 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { 
+    collection, 
+    query, 
+    orderBy, 
+    onSnapshot, 
+    addDoc, 
+    serverTimestamp, 
+    updateDoc, 
+    doc, 
+    increment,
+    where
+} from 'firebase/firestore';
 import { db } from '../services/firebase';
 
-export const useFeed = () => {
+export const useFeed = (filter = 'For You (AI)') => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const postsRef = collection(db, 'posts');
-        const q = query(postsRef, orderBy('createdAt', 'desc'));
+        let q;
+
+        if (filter === 'Global Trends') {
+            q = query(postsRef, orderBy('likes', 'desc'), orderBy('createdAt', 'desc'));
+        } else {
+            // Simplistic 'For You' - just latest for now
+            q = query(postsRef, orderBy('createdAt', 'desc'));
+        }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedPosts = snapshot.docs.map(doc => ({
@@ -25,7 +43,7 @@ export const useFeed = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [filter]);
 
     const createPost = async (postData) => {
         try {
@@ -34,7 +52,8 @@ export const useFeed = () => {
                 createdAt: serverTimestamp(),
                 likes: 0,
                 commentsCount: 0,
-                shareCount: 0
+                shareCount: 0,
+                likedBy: [] // Tracks who liked for UI toggle
             });
         } catch (err) {
             console.error("Error creating post:", err);
@@ -42,5 +61,15 @@ export const useFeed = () => {
         }
     };
 
-    return { posts, loading, error, createPost };
+    const toggleLike = async (postId, userId, isLiked) => {
+        const postRef = doc(db, 'posts', postId);
+        await updateDoc(postRef, {
+            likes: increment(isLiked ? -1 : 1),
+            likedBy: isLiked ? 
+                posts.find(p => p.id === postId).likedBy.filter(id => id !== userId) : 
+                [...(posts.find(p => p.id === postId).likedBy || []), userId]
+        });
+    };
+
+    return { posts, loading, error, createPost, toggleLike };
 };
