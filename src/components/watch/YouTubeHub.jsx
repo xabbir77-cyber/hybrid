@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Play, Plus, Send, Loader2, Youtube, Sparkles, Zap, Tv, Share2, MoreHorizontal, MessageSquare } from 'lucide-react';
+import { Search, Play, Plus, Send, Loader2, Youtube, Sparkles, Zap, Tv, Share2, MoreHorizontal, MessageSquare, X } from 'lucide-react';
 import axios from 'axios';
 
 const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
@@ -52,9 +52,9 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
     }, []);
 
     return (
-        <div className="h-full flex flex-col bg-[#020205] overflow-y-auto no-scrollbar">
-            {/* Search Hub Header */}
-            <div className="p-10 border-b border-white/5 bg-gradient-to-b from-red-500/5 to-transparent">
+        <div className="h-full bg-[#020205] overflow-y-auto no-scrollbar scroll-smooth">
+            {/* Search Hub Header (Sticky) */}
+            <div className="sticky top-0 z-30 p-10 border-b border-white/5 bg-[#020205]/80 backdrop-blur-3xl bg-gradient-to-b from-red-500/10 to-transparent">
                 <div className="max-w-4xl mx-auto w-full">
                     <div className="flex items-center gap-4 mb-8 justify-center">
                         <div className="p-3 bg-red-500/10 rounded-2xl text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
@@ -66,7 +66,10 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
                     <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-red-500 to-purple-600 rounded-3xl blur opacity-10 group-focus-within:opacity-30 transition duration-1000"></div>
                         <form 
-                            onSubmit={(e) => { e.preventDefault(); fetchTrending(query); }}
+                            onSubmit={(e) => { 
+                                e.preventDefault(); 
+                                if (query.trim()) fetchTrending(query); 
+                            }}
                             className="relative flex items-center bg-[#020205]/60 backdrop-blur-[60px] border border-white/10 rounded-3xl px-8 py-5 shadow-3xl"
                         >
                             <Search size={24} className="text-gray-500" />
@@ -77,9 +80,13 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                             />
-                            <button type="submit" className="bg-red-500 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-red-400 transition-all shadow-[0_10px_30px_rgba(239,68,68,0.3)] flex items-center gap-2">
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="bg-red-500 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_10px_30px_rgba(239,68,68,0.3)] flex items-center gap-2"
+                            >
                                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />} 
-                                <span className="hidden sm:inline">Initialize Scan</span>
+                                <span className="hidden sm:inline">{loading ? 'Scanning...' : 'Initialize Scan'}</span>
                             </button>
                         </form>
                     </div>
@@ -87,7 +94,7 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
             </div>
 
             {/* Video Grid */}
-            <div className="p-10">
+            <div className="p-10 min-h-[500px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-[1920px] mx-auto">
                     {videos.map((video, index) => (
                         <motion.div
@@ -155,18 +162,20 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-[40px] flex items-center justify-center p-4 md:p-10"
+                        onClick={() => setSelectedVideo(null)}
                     >
                         <motion.div 
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
                             className="w-full max-w-7xl bg-[#020205] rounded-[48px] overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(239,68,68,0.2)] flex flex-col h-[90vh]"
                         >
                             {/* Header */}
                             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/40">
                                 <div className="flex items-center gap-4">
                                     <div className="p-2.5 bg-red-500/10 rounded-xl text-red-500"><Tv size={20} /></div>
-                                    <h3 className="text-sm font-black text-white uppercase tracking-widest">{selectedVideo.title}</h3>
+                                    <h3 className="text-sm font-black text-white uppercase tracking-widest line-clamp-1">{selectedVideo.title}</h3>
                                 </div>
                                 <button 
                                     onClick={() => setSelectedVideo(null)}
@@ -187,7 +196,7 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
                             </div>
 
                             {/* Cinema Toolbar */}
-                            <div className="p-8 border-t border-white/5 flex items-center justify-between">
+                            <div className="p-8 border-t border-white/5 flex items-center justify-between flex-wrap gap-4">
                                 <div className="flex items-center gap-8">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full border border-red-500/30 flex items-center justify-center animate-pulse">
@@ -221,8 +230,5 @@ const YouTubeHub = ({ videos: initialVideos = [], setTab, updateParty }) => {
         </div>
     );
 };
-
-// Helper for Close button
-const X = ({ size }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
 export default YouTubeHub;
