@@ -23,14 +23,25 @@ export default function App() {
     };
 
     const handlePost = async (text) => {
-        await createPost({
-            uid: user?.uid,
-            user: user?.displayName || 'Hybrid User',
-            avatar: user?.photoURL || 'https://i.pravatar.cc/150?u=me',
-            code: user?.code || '87654321',
-            caption: text,
-            time: 'Just now'
-        });
+        if (!user) {
+            alert('Please login to share your world!');
+            loginWithGoogle();
+            return;
+        }
+
+        try {
+            await createPost({
+                uid: user.uid,
+                user: user.displayName || 'Hybrid User',
+                avatar: user.photoURL || 'https://i.pravatar.cc/150?u=me',
+                code: user.code || '87654321',
+                caption: text,
+                time: 'Just now'
+            });
+        } catch (error) {
+            console.error("Failed to post:", error);
+            alert("Posting failed. Check your connection or permissions.");
+        }
     };
 
     const renderPage = () => {

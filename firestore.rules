@@ -6,27 +6,21 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper to check if the user is the owner of the document
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
     // Rules for the 'posts' collection
     match /posts/{postId} {
-      allow read: if isAuthenticated();
+      allow read: if true; // Allow everyone to see the feed
       allow create: if isAuthenticated();
       allow update, delete: if isAuthenticated() && (resource.data.uid == request.auth.uid);
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      allow read: if true; // Allow users to be searched
+      allow write: if isAuthenticated() && request.auth.uid == userId;
       
-      // Sub-collection rules for notifications
       match /notifications/{noteId} {
-        allow read, update: if isOwner(userId);
-        allow create: if isAuthenticated(); // Allow others to send notifications (e.g. on follow/like)
+        allow read, update: if isAuthenticated() && request.auth.uid == userId;
+        allow create: if isAuthenticated();
       }
     }
   }
