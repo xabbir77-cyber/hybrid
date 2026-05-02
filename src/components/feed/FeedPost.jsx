@@ -188,7 +188,7 @@ const FeedPost = ({ post, onLike, currentUserId }) => {
                             <span className="text-[9px] font-black text-purple-400 uppercase tracking-[0.2em]">AI Intelligence Hub</span>
                         </div>
                         <p className="text-[12px] text-gray-400 italic font-bold leading-relaxed border-l-2 border-purple-500/30 pl-4">
-                            "Auto-Summary: This post discusses futuristic UI patterns and real-time interaction models in the Hybrid ecosystem."
+                            "{post.aiSummary || 'Auto-Summary: This post discusses futuristic UI patterns and real-time interaction models in the Hybrid ecosystem.'}"
                         </p>
                     </motion.div>
                 </div>

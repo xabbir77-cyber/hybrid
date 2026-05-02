@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, UserPlus, UserMinus, UserCheck, MessageSquare, MoreHorizontal, Users, ShieldCheck, Zap, X, Check, Heart, User } from 'lucide-react';
 
-const FriendsPage = ({ friends = [], requests = [], suggestions = [], onAccept, onDelete }) => {
+const FriendsPage = ({ friends = [], requests = [], suggestions = [], onAccept, onDelete, onSendRequest, onStartChat }) => {
     const [activeSection, setActiveSection] = useState('All Friends');
     const sections = ['All Friends', 'Requests', 'Suggestions'];
 
@@ -164,12 +164,24 @@ const FriendsPage = ({ friends = [], requests = [], suggestions = [], onAccept, 
                                             </div>
                                         ) : (
                                             <div className="flex gap-3">
-                                                <button className="flex-1 py-4 bg-white/5 hover:bg-white text-white hover:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all border border-white/10 flex items-center justify-center gap-3">
+                                                <button 
+                                                    onClick={() => onStartChat(item.uid || item.id, { name: item.displayName || item.name, avatar: item.photoURL || item.avatar })}
+                                                    className="flex-1 py-4 bg-white/5 hover:bg-white text-white hover:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all border border-white/10 flex items-center justify-center gap-3"
+                                                >
                                                     <MessageSquare size={14} /> Message
                                                 </button>
-                                                <button className="p-4 bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white rounded-2xl transition-all border border-white/5">
-                                                    <MoreHorizontal size={18} />
-                                                </button>
+                                                {activeSection === 'Suggestions' ? (
+                                                    <button 
+                                                        onClick={() => onSendRequest(item.uid || item.id, item)}
+                                                        className="p-4 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-white rounded-2xl transition-all border border-cyan-500/20"
+                                                    >
+                                                        <UserPlus size={18} />
+                                                    </button>
+                                                ) : (
+                                                    <button className="p-4 bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white rounded-2xl transition-all border border-white/5">
+                                                        <MoreHorizontal size={18} />
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
 

@@ -96,6 +96,30 @@ const HomePage = ({ posts, onPost, setTab, user, activeFilter, setActiveFilter, 
                         )}
                         className="no-scrollbar"
                     />
+
+                    {/* Guest Login Overlay */}
+                    {!user && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-[#020205]/40 backdrop-blur-md">
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-[#020205]/80 border border-white/10 p-12 rounded-[48px] text-center shadow-3xl max-w-md"
+                            >
+                                <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-cyan-500/20">
+                                    <Zap size={40} className="text-cyan-400" />
+                                </div>
+                                <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic mb-4">Neural Access Required</h2>
+                                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed mb-10">You must synchronize your identity with the Hybrid Global Cluster to view the neural data stream.</p>
+                                <button 
+                                    onClick={() => setTab('profile')}
+                                    className="w-full py-4 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-cyan-400 transition-all shadow-2xl"
+                                >
+                                    Initialize Identity
+                                </button>
+                                <p className="text-[8px] text-gray-600 mt-6 uppercase tracking-widest font-black">Encrypted via Layer 2.0 Auth</p>
+                            </motion.div>
+                        </div>
+                    )}
                 </main>
 
                 {/* Right Sidebar (Contacts & Events) */}

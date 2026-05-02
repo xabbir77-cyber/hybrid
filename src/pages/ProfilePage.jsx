@@ -88,7 +88,7 @@ const ProfilePage = () => {
                         <div className="flex items-center gap-6 text-gray-500 font-black uppercase tracking-[0.2em] text-[10px]">
                             <span className="flex items-center gap-2 text-white/60"><MapPin size={12} className="text-cyan-500" /> Global Node</span>
                             <span className="flex items-center gap-2"><Calendar size={12} /> Joined Mar 2026</span>
-                            <span className="flex items-center gap-2 text-cyan-400"><Zap size={12} /> 12.4k Karma</span>
+                            <span className="flex items-center gap-2 text-cyan-400"><Zap size={12} /> {user.karma || '12.4k'} Karma</span>
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@ const ProfilePage = () => {
                                 { label: 'Node Connections', val: '2.4K', color: 'text-cyan-400' },
                                 { label: 'Data Retention', val: '98.2%', color: 'text-purple-400' },
                                 { label: 'Visual Reach', val: '1.2M', color: 'text-blue-400' },
-                                { label: 'System Trust', val: 'Alpha', color: 'text-emerald-400' },
+                                { label: 'Identity Code', val: user.code || '#87654321', color: 'text-emerald-400' },
                             ].map(stat => (
                                 <div key={stat.label} className="space-y-1">
                                     <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{stat.label}</p>

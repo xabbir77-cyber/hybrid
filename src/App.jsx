@@ -24,7 +24,7 @@ export default function App() {
     const { posts, createPost, toggleLike } = useFeed(activeFilter);
     const { results: searchResults, searchUsers, loading: searchLoading } = useSearch();
     const { friends, requests, suggestions, sendRequest, acceptRequest, deleteRequest } = useSocial();
-    const { conversations, messages, sendMessage, startConversation } = useMessages();
+    const { conversations, messages, sendMessage, startConversation, toggleFocus, translateMessage } = useMessages();
     const [currentPartyId, setCurrentPartyId] = useState('global-hub');
     const { videos: watchVideos, partyState, updateParty, joinParty } = useWatch(currentPartyId);
 
@@ -78,6 +78,11 @@ export default function App() {
                     suggestions={suggestions}
                     onAccept={acceptRequest}
                     onDelete={deleteRequest}
+                    onSendRequest={sendRequest}
+                    onStartChat={async (uid, data) => {
+                        const cid = await startConversation(uid, data);
+                        setActiveTab('messages');
+                    }}
                 />
             );
             default: return <HomePage posts={posts} onPost={handlePost} setTab={setActiveTab} user={user} activeFilter={activeFilter} setActiveFilter={setActiveFilter} toggleLike={toggleLike} />;

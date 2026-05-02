@@ -69,7 +69,10 @@ export const useMessages = (activeConversationId) => {
             senderName: user.displayName,
             senderAvatar: user.photoURL,
             createdAt: serverTimestamp(),
-            ...metadata
+            metadata: {
+                ...metadata,
+                ai_summary: `Synthesizing transmission: "${text.substring(0, 15)}..."`
+            }
         };
 
         // Add to messages subcollection

@@ -53,7 +53,8 @@ export const useFeed = (filter = 'For You (AI)') => {
                 likes: 0,
                 commentsCount: 0,
                 shareCount: 0,
-                likedBy: [] // Tracks who liked for UI toggle
+                likedBy: [],
+                aiSummary: `Auto-Generated: This post analyzed as "${postData.caption.substring(0, 30)}..." - High engagement potential.`
             });
         } catch (err) {
             console.error("Error creating post:", err);
