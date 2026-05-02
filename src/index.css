@@ -31,3 +31,41 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(147, 51, 234, 0.5);
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glow-purple {
+  box-shadow: 0 0 15px rgba(147, 51, 234, 0.5);
+}
+
+.glow-blue {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+}
