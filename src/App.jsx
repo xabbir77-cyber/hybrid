@@ -7,6 +7,7 @@ import WatchPage from './pages/WatchPage';
 import ExplorePage from './pages/ExplorePage';
 import MessagePage from './pages/MessagePage';
 import ProfilePage from './pages/ProfilePage';
+import FriendsPage from './pages/FriendsPage';
 import { getInitialPosts, getMockUsers } from './services/apiService';
 import { useFeed } from './hooks/useFeed';
 import { useAuth } from './hooks/useAuth';
@@ -46,12 +47,13 @@ export default function App() {
 
     const renderPage = () => {
         switch (activeTab) {
-            case 'home': return <HomePage posts={firebasePosts} onPost={handlePost} />;
+            case 'home': return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} />;
             case 'watch': return <WatchPage />;
             case 'explore': return <ExplorePage />;
             case 'messages': return <MessagePage />;
             case 'profile': return <ProfilePage />;
-            default: return <HomePage posts={firebasePosts} onPost={handlePost} />;
+            case 'friends': return <FriendsPage />;
+            default: return <HomePage posts={firebasePosts} onPost={handlePost} setTab={setActiveTab} />;
         }
     };
 
@@ -63,6 +65,7 @@ export default function App() {
                     onSearch={handleSearch} 
                     users={searchResults} 
                     isLoadingSearch={searchLoading}
+                    setTab={setActiveTab}
                 />
             )}
 

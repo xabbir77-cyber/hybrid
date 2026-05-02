@@ -7,7 +7,7 @@ import FeedPost from '../components/feed/FeedPost';
 import StoryTray from '../components/feed/StoryTray';
 import { SkeletonPost } from '../components/common/SkeletonLoader';
 
-const HomePage = ({ posts, onPost }) => {
+const HomePage = ({ posts, onPost, setTab }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [activeFilter, setActiveFilter] = useState('For You (AI)');
 
@@ -23,15 +23,16 @@ const HomePage = ({ posts, onPost }) => {
                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 px-3">Shortcuts</h3>
                         <nav className="space-y-1">
                             {[
-                                { icon: Users, label: 'Friends', color: 'text-blue-400' },
-                                { icon: Clock, label: 'Memories', color: 'text-purple-400' },
-                                { icon: Bookmark, label: 'Saved', color: 'text-cyan-400' },
-                                { icon: Users2, label: 'Groups', color: 'text-indigo-400' },
-                                { icon: ShoppingBag, label: 'Marketplace', color: 'text-emerald-400' },
+                                { icon: Users, label: 'Friends', color: 'text-blue-400', tab: 'friends' },
+                                { icon: Clock, label: 'Memories', color: 'text-purple-400', tab: 'explore' },
+                                { icon: Bookmark, label: 'Saved', color: 'text-cyan-400', tab: 'profile' },
+                                { icon: Users2, label: 'Groups', color: 'text-indigo-400', tab: 'explore' },
+                                { icon: ShoppingBag, label: 'Marketplace', color: 'text-emerald-400', tab: 'explore' },
                             ].map((item, i) => (
                                 <motion.div 
                                     key={i} 
                                     whileHover={{ x: 5, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                                    onClick={() => setTab(item.tab)}
                                     className="flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all group"
                                 >
                                     <div className={`p-2 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors ${item.color}`}>

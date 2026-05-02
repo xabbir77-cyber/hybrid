@@ -6,7 +6,7 @@ import UniversalSearch from './UniversalSearch';
 import ProfileMenu from './ProfileMenu';
 import { motion } from 'framer-motion';
 
-const TopNavigation = ({ onSearch, users = [], isLoadingSearch }) => {
+const TopNavigation = ({ onSearch, users = [], isLoadingSearch, setTab }) => {
     const { user } = useAuth();
     const { unreadCount } = useNotifications();
     const [hasNewRequests, setHasNewRequests] = useState(false); // Can be linked to useFriendRequests later
@@ -42,6 +42,7 @@ const TopNavigation = ({ onSearch, users = [], isLoadingSearch }) => {
                     <div className="flex items-center gap-3">
                         {/* Friends Icon */}
                         <motion.button 
+                            onClick={() => setTab('friends')}
                             className={`p-3 text-gray-400 hover:text-cyan-400 glass-effect rounded-2xl transition-all relative ${hasNewRequests ? 'pulse-red-glow' : ''}`}
                             whileHover={{ y: -2 }}
                         >
