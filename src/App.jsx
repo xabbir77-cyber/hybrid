@@ -53,7 +53,7 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white font-sans overflow-hidden selection:bg-purple-500/30">
+        <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-purple-500/30 overflow-x-hidden">
             {/* Show TopNav only on pages that need it */}
             {activeTab !== 'watch' && activeTab !== 'messages' && (
                 <TopNavigation onSearch={handleSearch} users={filteredUsers} />

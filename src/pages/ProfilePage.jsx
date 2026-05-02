@@ -31,8 +31,13 @@ const ProfilePage = () => {
                 <h2 className="text-3xl font-black text-white mb-4">Join the Experience</h2>
                 <p className="text-gray-400 mb-8 font-light italic">Access your personalized infinite feed and sync your digital world across the Hybrid network.</p>
                 <button 
-                    onClick={loginWithGoogle}
-                    className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95"
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        console.log("Triggering Google Login...");
+                        loginWithGoogle().catch(err => console.error("Login failed:", err));
+                    }}
+                    className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 cursor-pointer relative z-50"
                 >
                     Login with Google
                 </button>
